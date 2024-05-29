@@ -12,7 +12,7 @@ import java.util.List;
 @Entity(name = "Ecom_User")
 public class User extends BaseModel{
     private String name;
-    private String email;
+    private String emailId;
     private String phoneNumber;
     private String password;
     private String token;

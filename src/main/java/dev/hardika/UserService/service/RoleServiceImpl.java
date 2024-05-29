@@ -10,12 +10,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class RoleServiceImpl implements RoleService{
     @Autowired
-    RoleRepository roleRepository;
+    private RoleRepository roleRepository;
+
     @Override
     public RoleResponseDto createRole(RoleRequestDto requestDto) {
         Role role = new Role();
         role.setRoleName(requestDto.getRoleName());
         role.setDescription(requestDto.getDesc());
+        roleRepository.save(role);
         return RoleResponseDto.from(role);
     }
 }

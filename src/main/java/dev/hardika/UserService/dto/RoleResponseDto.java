@@ -4,16 +4,20 @@ import dev.hardika.UserService.Entity.Role;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 public class RoleResponseDto {
     private String roleName;
     private String desc;
+    private UUID id;
 
     public static RoleResponseDto from(Role role){
         RoleResponseDto roleResponseDto = new RoleResponseDto();
-        roleResponseDto.setRoleName(role.getRoleName());
-        roleResponseDto.setDesc(role.getDescription());
+        roleResponseDto.roleName = role.getRoleName();
+        roleResponseDto.desc = role.getDescription();
+        roleResponseDto.id = role.getId();
         return roleResponseDto;
     }
 }

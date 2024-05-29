@@ -16,25 +16,31 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService{
+
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
+
     @Autowired
-    RoleRepository roleRepository;
+    private RoleRepository roleRepository;
+
     @Override
     public UserResponseDto login(LoginRequestDto loginRequestDto) {
         BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
         User saveUser = userRepository.findByEmailId(loginRequestDto.getEmail()).
                 orElseThrow(() -> new UserNotFoundException("User Not Found"));
+
         if (bCryptPasswordEncoder.matches(loginRequestDto.getPassword(), saveUser.getPassword())) {
-            String userData = saveUser.getEmail() + saveUser.getPassword() + LocalDateTime.now();
+            String userData = saveUser.getEmailId() + saveUser.getPassword() + LocalDateTime.now();
             String token = bCryptPasswordEncoder.encode(userData);
             saveUser.setToken(token);
         } else {
             throw new InvalidCredentialException("Token is not valid");
         }
+
         saveUser = userRepository.save(saveUser);
         return UserResponseDto.from(saveUser);
     }
@@ -49,17 +55,18 @@ public class UserServiceImpl implements UserService{
 
         User user = new User();
         user.setName(singUpRequestDto.getName());
-        user.setEmail(singUpRequestDto.getEmail());
+        user.setEmailId(singUpRequestDto.getEmail());
         user.setPassword(bCryptPasswordEncoder.encode(singUpRequestDto.getPassword()));
         user.setRole(List.of(role));
 
-        return UserResponseDto.from(user);
+        return UserResponseDto.from(userRepository.save(user));
     }
 
     @Override
     public boolean validateToken(String token) {
         User savedUser = userRepository.findByToken(token).
                 orElseThrow(() -> new InvalidCredentialException("Token is not valid"));
+
         return true;
     }
 
@@ -69,6 +76,7 @@ public class UserServiceImpl implements UserService{
                 orElseThrow(()-> new InvalidCredentialException("Token is not valid"));
         savedUser.setToken(null);
         userRepository.save(savedUser);
+
         return true;
     }
 }
