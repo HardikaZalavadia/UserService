@@ -11,5 +11,5 @@ public class SingUpRequestDto {
     private String name;
     private String email;
     private String password;
-    private UUID roleId;
+    private Long roleId;
 }

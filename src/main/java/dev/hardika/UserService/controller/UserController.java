@@ -1,7 +1,5 @@
 package dev.hardika.UserService.controller;
 
-import dev.hardika.UserService.dto.LoginRequestDto;
-import dev.hardika.UserService.dto.SingUpRequestDto;
 import dev.hardika.UserService.dto.UserResponseDto;
 import dev.hardika.UserService.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,28 +13,15 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @PostMapping("/login")
-    public ResponseEntity<UserResponseDto> login(@RequestBody LoginRequestDto loginRequestDto){
-
-        return ResponseEntity.ok(userService.login(loginRequestDto));
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponseDto> getUserDetails(@PathVariable("{id}") Long userId) {
+        UserResponseDto userResponseDto = userService.getUserDetails(userId);
+        return ResponseEntity.ok(userResponseDto);
     }
 
-    @PostMapping("/singUp")
-    public ResponseEntity singUp(@RequestBody SingUpRequestDto singUpRequestDto){
-
-        return ResponseEntity.ok(userService.singUp(singUpRequestDto));
+    @GetMapping("/{id}/setrole")
+    public ResponseEntity<UserResponseDto> serUserRole(@PathVariable("/{id}") Long userId, @RequestBody String roleName) {
+        UserResponseDto userResponseDto = userService.setUserRole(userId,roleName);
+        return ResponseEntity.ok(userResponseDto);
     }
-
-    @GetMapping("/singOut")
-    public ResponseEntity<Boolean> logOut(@RequestHeader("Authorization") String authToken) {
-        return ResponseEntity.ok(userService.logout(authToken));
-
-    }
-
-    @GetMapping("/validate")
-    public ResponseEntity<Boolean> validate(@RequestHeader("Authorization") String authToken){
-
-        return ResponseEntity.ok(userService.validateToken(authToken));
-    }
-
 }

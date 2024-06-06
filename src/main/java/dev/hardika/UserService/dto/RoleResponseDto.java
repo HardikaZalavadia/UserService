@@ -11,7 +11,7 @@ import java.util.UUID;
 public class RoleResponseDto {
     private String roleName;
     private String desc;
-    private UUID id;
+    private Long id;
 
     public static RoleResponseDto from(Role role){
         RoleResponseDto roleResponseDto = new RoleResponseDto();
