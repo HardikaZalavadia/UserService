@@ -7,6 +7,7 @@ import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -21,7 +22,7 @@ public class BaseModel {
     private boolean isActive;
     @CreationTimestamp
     private Instant createdAt;
-    @CreationTimestamp
+    @UpdateTimestamp
     private Instant updatedAt;
 
 }

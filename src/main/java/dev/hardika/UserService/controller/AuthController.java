@@ -7,8 +7,10 @@ import dev.hardika.UserService.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMapAdapter;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Optional;
 
 @RestController
@@ -20,12 +22,12 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<UserResponseDto> login(@RequestBody LoginRequestDto loginRequestDto){
-
-        return ResponseEntity.ok(authService.login(loginRequestDto));
+        UserResponseDto respones = authService.login(loginRequestDto);
+        return ResponseEntity.ok(respones);
     }
 
-    @PostMapping("/singUp")
-    public ResponseEntity<UserResponseDto> singUp(@RequestBody SingUpRequestDto singUpRequestDto){
+    @PostMapping("/signup")
+    public ResponseEntity<UserResponseDto> signUp(@RequestBody SingUpRequestDto singUpRequestDto){
 
         return ResponseEntity.ok(authService.singUp(singUpRequestDto));
     }

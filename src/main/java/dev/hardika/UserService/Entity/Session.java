@@ -15,7 +15,7 @@ import java.time.Instant;
 public class Session extends BaseModel{
     private String token;
     private Instant expiresAt;
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL) // Ordinal means session status stored as: 1 as ACTIVE, 2 as EXPIRED and so on
     private SessionStatus status;
     @ManyToOne
     private User user;

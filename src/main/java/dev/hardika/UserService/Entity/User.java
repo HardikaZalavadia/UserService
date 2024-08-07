@@ -1,6 +1,7 @@
 package dev.hardika.UserService.Entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToMany;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,7 +17,8 @@ public class User extends BaseModel{
     private String phoneNumber;
     private String password;
     private String token;
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
+
     private List<Role> role;
 
 }
