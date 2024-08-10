@@ -34,25 +34,25 @@ public class AuthController {
 
 
     @GetMapping("/singOut")
-    public ResponseEntity<Boolean> logOut(@RequestHeader("Authorization") String authToken) {
-        return ResponseEntity.ok(authService.logout(authToken));
+    public ResponseEntity<Boolean> logOut(@RequestHeader("Authorization") String authToken, Long userId) {
+        return ResponseEntity.ok(authService.logout(authToken, userId));
 
     }
 
     @PostMapping("/validate")
     public ResponseEntity<ValidationResponseDTO> validate(@RequestBody ValidationRequestDTO requestDTO) {
-        Optional<UserResponseDto> userDTO = authService.validateToken(requestDTO.getToken(), requestDTO.getUserId());
-        ValidationResponseDTO responseDTO = new ValidationResponseDTO();
-        if (userDTO.isEmpty()) {
-            responseDTO.setSessionStatus(SessionStatus.INVALID);
-            return new ResponseEntity<>(responseDTO, HttpStatus.OK);
-        }
-        responseDTO.setSessionStatus(SessionStatus.ACTIVE);
-        responseDTO.setUserDTO(userDTO.get());
-        return new ResponseEntity<>(responseDTO, HttpStatus.OK);
+        //Optional<UserResponseDto> userDTO = authService.validateToken(requestDTO.getToken(), requestDTO.getUserId());
+        ValidationResponseDTO validationResponseDTO = authService.validateToken(requestDTO.getToken(), requestDTO.getUserId());
+//        if (userDTO.isEmpty()) {
+//            responseDTO.setSessionStatus(SessionStatus.INVALID);
+//            return new ResponseEntity<>(responseDTO, HttpStatus.OK);
+//        }
+
+        //responseDTO.setUserDTO(userDTO.get());
+        return new ResponseEntity<>(validationResponseDTO, HttpStatus.OK);
     }
 
-//
+
 //    @GetMapping("/validate")
 //    public ResponseEntity<Boolean> validate(@RequestHeader("Authorization") String authToken){
 //

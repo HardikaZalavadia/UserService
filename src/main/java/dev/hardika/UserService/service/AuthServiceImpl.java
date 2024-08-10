@@ -11,6 +11,7 @@ import dev.hardika.UserService.Exception.UserNotFoundException;
 import dev.hardika.UserService.dto.LoginRequestDto;
 import dev.hardika.UserService.dto.SingUpRequestDto;
 import dev.hardika.UserService.dto.UserResponseDto;
+import dev.hardika.UserService.dto.ValidationResponseDTO;
 import dev.hardika.UserService.repository.RoleRepository;
 import dev.hardika.UserService.repository.SessionRepository;
 import dev.hardika.UserService.repository.UserRepository;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMapAdapter;
 
@@ -37,23 +39,32 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private SessionRepository sessionRepository;
 
+    private PasswordEncoder passwordEncoder;
+
+    public AuthServiceImpl(UserRepository userRepository, RoleRepository roleRepository, SessionRepository sessionRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.sessionRepository = sessionRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
     @Override
     public UserResponseDto login(LoginRequestDto loginRequestDto) {
-        BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+        //BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
         User saveUser = userRepository.findByEmailId(loginRequestDto.getEmail()).
                 orElseThrow(() -> new UserNotFoundException("User with email: " + loginRequestDto.getEmail() + " does not exist"));
 
-        if (!bCryptPasswordEncoder.matches(loginRequestDto.getPassword(), saveUser.getPassword())) {
+        if (!passwordEncoder.matches(loginRequestDto.getPassword(), saveUser.getPassword())) {
             throw new InvalidCredentialException("Password is incorrect");
         }
 
         // Token generation
-//        String userData = saveUser.getEmailId() + saveUser.getPassword() + LocalDateTime.now();
-//        String token = bCryptPasswordEncoder.encode(userData);
-//        saveUser.setToken(token);
+        String userData = saveUser.getEmailId() + saveUser.getPassword() + LocalDateTime.now();
+        String token = passwordEncoder.encode(userData);
+        saveUser.setToken(token);
 //              OR
         //RandomStringUtils randomStringUtils = new RandomStringUtils();
-        String token = RandomStringUtils.randomAscii(20);
+//        String token = RandomStringUtils.randomAscii(20);
 
 
         MultiValueMapAdapter<String, String> headers = new MultiValueMapAdapter<>(new HashMap<>());
@@ -96,19 +107,26 @@ public class AuthServiceImpl implements AuthService {
 
         return UserResponseDto.from(userRepository.save(user));
     }
-    public Optional<UserResponseDto> validateToken(String token, Long userId) {
+    public ValidationResponseDTO validateToken(String token, Long userId) {
         Optional<Session> sessionOptional = sessionRepository.findByTokenAndUserId(token, userId);
+        ValidationResponseDTO validationResponseDTO = new ValidationResponseDTO();
         if(sessionOptional.isEmpty()){
-            return Optional.empty();
+            validationResponseDTO.setSessionStatus(SessionStatus.INVALID);
+            return validationResponseDTO;
         }
         Session session = sessionOptional.get();
         if (!session.getStatus().equals(SessionStatus.ACTIVE)){
-            return Optional.empty();
+            validationResponseDTO.setSessionStatus(SessionStatus.EXPIRED);
+            return validationResponseDTO;
         }
+
         User user = session.getUser();
-        //Optional<User> user = userRepository.findById(userId);
+        //Optional<User> optionalUser = userRepository.findById(userId);
         UserResponseDto userDto = UserResponseDto.from(user);
-        return Optional.of(userDto);
+        validationResponseDTO.setUserDTO(userDto);
+        validationResponseDTO.setSessionStatus(SessionStatus.ACTIVE);
+        return validationResponseDTO;
+
     }
 
 //    @Override
@@ -119,11 +137,19 @@ public class AuthServiceImpl implements AuthService {
 //    }
 
     @Override
-    public boolean logout(String token) {
-        User savedUser = userRepository.findByToken(token).
-                orElseThrow(()-> new InvalidCredentialException("Token is not valid"));
-        savedUser.setToken(null);
-        userRepository.save(savedUser);
+    public boolean logout(String token, Long userID){
+        Optional<Session> optionalSession = sessionRepository.findByTokenAndUserId(token, userID);
+        if(optionalSession.isEmpty()){
+            return true;
+        }
+        Session session = optionalSession.get();
+        session.setStatus(SessionStatus.LOGGED_OUT);
+        sessionRepository.save(session);
         return true;
+
+    //                orElseThrow(()-> new InvalidCredentialException("Token is not valid"));
+//        savedUser.setToken(null);
+//        userRepository.save(savedUser);//        User savedUser = userRepository.findByToken(token).authService.validateToken(requestDTO.getToken(), requestDTO.getUserId());
+//        return true;
     }
 }
